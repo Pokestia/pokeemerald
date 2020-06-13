@@ -1,1 +1,9 @@
 Decreased maximum possible fishing rounds required by 1.
+
+Egg:
+Nature color stats
+BW repel system
+Money
+
+group:
+pokemon_expansion
