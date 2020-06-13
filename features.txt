@@ -7,3 +7,4 @@ Money
 
 group:
 pokemon_expansion
+battle engine
