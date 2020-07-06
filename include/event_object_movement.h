@@ -72,6 +72,7 @@ bool8 TryGetObjectEventIdByLocalIdAndMap(u8, u8, u8, u8 *);
 u8 GetObjectEventIdByXY(s16, s16);
 void SetObjectEventDirection(struct ObjectEvent *, u8);
 u8 GetFirstInactiveObjectEventId(void);
+void RemoveObjectEvent(struct ObjectEvent *objectEvent);
 void RemoveObjectEventByLocalIdAndMap(u8, u8, u8);
 void LoadPlayerObjectReflectionPalette(u16, u8);
 void LoadSpecialObjectReflectionPalette(u16, u8);
@@ -197,6 +198,8 @@ void CameraObjectReset2(void);
 u8 ObjectEventGetBerryTreeId(u8 objectEventId);
 void sub_8092EF0(u8 mapId, u8 mapNumber, u8 mapGroup);
 bool8 IsBerryTreeSparkling(u8, u8, u8);
+struct ObjectEventTemplate *GetObjectEventTemplateByLocalIdAndMap(u8 localId, u8 mapNum, u8 mapGroup);
+u8 TrySpawnObjectEventTemplate(struct ObjectEventTemplate *objectEventTemplate, u8 mapNum, u8 mapGroup, s16 cameraX, s16 cameraY);
 
 void MovementType_None(struct Sprite *);
 void MovementType_LookAround(struct Sprite *);
@@ -419,5 +422,10 @@ bool32 sub_8097C8C(u8 var);
 void sub_8097BB4(u8 var1, u8 graphicsId);
 void sub_8097CC4(u8 var1, u8 var2);
 bool32 sub_8097D9C(u8 var);
+
+// NEW
+u16 GetMiniStepCount(u8 speed);
+void RunMiniStep(struct Sprite *sprite, u8 speed, u8 currentFrame);
+bool8 PlayerIsUnderWaterfall(struct ObjectEvent *objectEvent);
 
 #endif //GUARD_EVENT_OBJECT_MOVEMENT_H

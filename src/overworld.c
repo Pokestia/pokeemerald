@@ -57,6 +57,7 @@
 #include "scanline_effect.h"
 #include "wild_encounter.h"
 #include "frontier_util.h"
+#include "follow_me.h"
 #include "constants/abilities.h"
 #include "constants/layouts.h"
 #include "constants/map_types.h"
@@ -66,6 +67,7 @@
 #include "constants/species.h"
 #include "constants/trainer_hill.h"
 #include "constants/weather.h"
+#include "constants/event_object_movement.h"
 
 #define PLAYER_TRADING_STATE_IDLE 0x80
 #define PLAYER_TRADING_STATE_BUSY 0x81
@@ -438,6 +440,8 @@ static void Overworld_ResetStateAfterWhiteOut(void)
         VarSet(VAR_SHOULD_END_ABNORMAL_WEATHER, 0);
         VarSet(VAR_ABNORMAL_WEATHER_LOCATION, ABNORMAL_WEATHER_NONE);
     }
+    
+    FollowMe_TryRemoveFollowerOnWhiteOut();
 }
 
 static void sub_8084788(void)
@@ -1459,6 +1463,10 @@ static void DoCB1_Overworld(u16 newKeys, u16 heldKeys)
             player_step(inputStruct.dpadDirection, newKeys, heldKeys);
         }
     }
+    
+    // if stop running but keep holding B -> fix follower frame
+    if (PlayerHasFollower() && IsPlayerOnFoot() && IsPlayerStandingStill())
+        ObjectEventSetHeldMovement(&gObjectEvents[GetFollowerObjectId()], GetFaceDirectionAnimNum(gObjectEvents[GetFollowerObjectId()].facingDirection));
 }
 
 void CB1_Overworld(void)
@@ -1586,7 +1594,7 @@ void CB2_LoadMap(void)
 
 static void CB2_LoadMap2(void)
 {
-    do_load_map_stuff_loop(&gMain.state);
+    do_load_map_stuff_loop(&gMain.state);    
     SetFieldVBlankCallback();
     SetMainCallback1(CB1_Overworld);
     SetMainCallback2(CB2_Overworld);
@@ -1895,14 +1903,14 @@ static bool32 load_map_stuff(u8 *state, u32 a2)
 {
     switch (*state)
     {
-    case 0:
-        FieldClearVBlankHBlankCallbacks();
+    case 0:       
+        FieldClearVBlankHBlankCallbacks();          
         mli0_load_map(a2);
         (*state)++;
         break;
     case 1:
         sub_80867C8();
-        sub_80867D8();
+        sub_80867D8();        
         (*state)++;
         break;
     case 2:
@@ -1911,7 +1919,7 @@ static bool32 load_map_stuff(u8 *state, u32 a2)
         break;
     case 3:
         mli4_mapscripts_and_other();
-        sub_8086A80();
+        sub_8086A80();        
         (*state)++;
         break;
     case 4:
@@ -1944,7 +1952,7 @@ static bool32 load_map_stuff(u8 *state, u32 a2)
         (*state)++;
         break;
     case 10:
-        InitTilesetAnimations();
+        InitTilesetAnimations();        
         (*state)++;
         break;
     case 11:
@@ -1978,6 +1986,7 @@ static bool32 sub_8086638(u8 *state)
     case 1:
         sub_8086860();
         sub_81D64C0();
+        FollowMe_BindToSurbBlobOnReloadScreen();
         (*state)++;
         break;
     case 2:
@@ -1996,9 +2005,9 @@ static bool32 map_loading_iteration_2_link(u8 *state)
     switch (*state)
     {
     case 0:
-        FieldClearVBlankHBlankCallbacks();
+        FieldClearVBlankHBlankCallbacks();        
         sub_80867C8();
-        sub_80867D8();
+        sub_80867D8();        
         (*state)++;
         break;
     case 1:
@@ -2180,6 +2189,8 @@ static void mli4_mapscripts_and_other(void)
     ResetInitialPlayerAvatarState();
     TrySpawnObjectEvents(0, 0);
     TryRunOnWarpIntoMapScript();
+    
+    FollowMe_HandleSprite();
 }
 
 static void sub_8086A68(void)

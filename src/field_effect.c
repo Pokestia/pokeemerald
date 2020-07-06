@@ -26,6 +26,7 @@
 #include "trainer_pokemon_sprites.h"
 #include "trig.h"
 #include "util.h"
+#include "follow_me.h"
 #include "constants/field_effects.h"
 #include "constants/event_object_movement.h"
 #include "constants/metatile_behaviors.h"
@@ -1494,6 +1495,9 @@ static bool8 FallWarpEffect_7(struct Task *task)
     UnfreezeObjectEvents();
     InstallCameraPanAheadCallback();
     DestroyTask(FindTaskIdByFunc(Task_FallWarpFieldEffect));
+    
+    FollowMe_WarpSetEnd();
+    
     return FALSE;
 }
 
@@ -1534,6 +1538,9 @@ static bool8 EscalatorWarpEffect_2(struct Task *task)
         task->data[0]++;
         task->data[2] = 0;
         task->data[3] = 0;
+        
+        EscalatorMoveFollower(task->data[1]);
+        
         if ((u8)task->data[1] == 0)
         {
             task->data[0] = 4;
@@ -1605,12 +1612,14 @@ static void sub_80B7004(struct Task *task)
     }
 }
 
+//Escalator_BeginFadeOutToNewMap
 static void sub_80B7050(void)
 {
     TryFadeOutOldMapMusic();
     WarpFadeOutScreen();
 }
 
+//Escalator_TransitionToWarpInEffect
 static void sub_80B7060(void)
 {
     if (!gPaletteFade.active && BGMusicStopped() == TRUE)
@@ -1623,6 +1632,7 @@ static void sub_80B7060(void)
     }
 }
 
+//FieldCB_EscalatorWarpIn
 static void sub_80B70B4(void)
 {
     Overworld_PlaySpecialMapMusic();
@@ -1632,6 +1642,7 @@ static void sub_80B70B4(void)
     gFieldCallback = NULL;
 }
 
+//Task_EscalatorWarpInFieldEffect
 static void sub_80B70DC(u8 taskId)
 {
     struct Task *task;
@@ -1639,6 +1650,7 @@ static void sub_80B70DC(u8 taskId)
     while (gUnknown_0855C3FC[task->data[0]](task));
 }
 
+//EscalatorWarpInEffect_1
 static bool8 sub_80B7114(struct Task *task)
 {
     struct ObjectEvent *objectEvent;
@@ -1661,9 +1673,12 @@ static bool8 sub_80B7114(struct Task *task)
         behavior = 0;
     }
     sub_80E1558(behavior);
+    
+    EscalatorMoveFollowerFinish();
     return TRUE;
 }
 
+//EscalatorWarpInEffect_2
 static bool8 sub_80B7190(struct Task *task)
 {
     struct Sprite *sprite;
@@ -1674,6 +1689,7 @@ static bool8 sub_80B7190(struct Task *task)
     return FALSE;
 }
 
+//EscalatorWarpInEffect_3
 static bool8 sub_80B71D0(struct Task *task)
 {
     struct Sprite *sprite;
@@ -2919,6 +2935,9 @@ static void sub_80B8EA8(struct Task *task)
         ObjectEventSetGraphicsId(objectEvent, GetPlayerAvatarGraphicsIdByStateId(3));
         ObjectEventClearHeldMovementIfFinished(objectEvent);
         ObjectEventSetHeldMovement(objectEvent, GetJumpSpecialMovementAction(objectEvent->movementDirection));
+        
+        FollowMe_FollowerToWater();
+        
         gFieldEffectArguments[0] = task->data[1];
         gFieldEffectArguments[1] = task->data[2];
         gFieldEffectArguments[2] = gPlayerAvatar.objectEventId;
@@ -2936,7 +2955,7 @@ static void sub_80B8F24(struct Task *task)
         gPlayerAvatar.preventStep = FALSE;
         gPlayerAvatar.flags &= 0xdf;
         ObjectEventSetHeldMovement(objectEvent, GetFaceDirectionMovementAction(objectEvent->movementDirection));
-        sub_81555AC(objectEvent->fieldEffectSpriteId, 1);
+        BindFieldEffectToSprite(objectEvent->fieldEffectSpriteId, 1);
         UnfreezeObjectEvents();
         ScriptContext2_Disable();
         FieldEffectActiveListRemove(FLDEFF_USE_SURF);
@@ -3072,7 +3091,7 @@ static void sub_80B92A0(struct Task *task)
         struct ObjectEvent *objectEvent = &gObjectEvents[gPlayerAvatar.objectEventId];
         if (task->data[15] & 0x08)
         {
-            sub_81555AC(objectEvent->fieldEffectSpriteId, 2);
+            BindFieldEffectToSprite(objectEvent->fieldEffectSpriteId, 2);
             sub_81555D8(objectEvent->fieldEffectSpriteId, 0);
         }
         task->data[1] = sub_80B94C4();
@@ -3341,7 +3360,7 @@ static void sub_80B9804(struct Task *task)
         SetPlayerAvatarStateMask(0x01);
         if (task->data[15] & 0x08)
         {
-            sub_81555AC(objectEvent->fieldEffectSpriteId, 0);
+            BindFieldEffectToSprite(objectEvent->fieldEffectSpriteId, 0);
         }
         ObjectEventSetGraphicsId(objectEvent, GetPlayerAvatarGraphicsIdByStateId(0x3));
         CameraObjectReset2();
@@ -3451,7 +3470,7 @@ static void sub_80B9A60(struct Task *task)
         if (task->data[15] & 0x08)
         {
             state = 3;
-            sub_81555AC(objectEvent->fieldEffectSpriteId, 1);
+            BindFieldEffectToSprite(objectEvent->fieldEffectSpriteId, 1);
         }
         ObjectEventSetGraphicsId(objectEvent, GetPlayerAvatarGraphicsIdByStateId(state));
         ObjectEventTurn(objectEvent, DIR_SOUTH);

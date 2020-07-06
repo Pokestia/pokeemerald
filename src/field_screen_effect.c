@@ -27,6 +27,7 @@
 #include "start_menu.h"
 #include "task.h"
 #include "text.h"
+#include "follow_me.h"
 #include "constants/event_object_movement.h"
 #include "constants/event_objects.h"
 #include "constants/songs.h"
@@ -40,14 +41,14 @@ extern const u16 gOrbEffectBackgroundLayerFlags[];
 static void sub_8080B9C(u8);
 static void Task_ExitNonAnimDoor(u8);
 static void Task_ExitNonDoor(u8);
-static void task0A_fade_n_map_maybe(u8);
+//static void task0A_fade_n_map_maybe(u8);
 static void sub_808115C(u8);
 static void FillPalBufferWhite(void);
 static void Task_ExitDoor(u8);
 static bool32 WaitForWeatherFadeIn(void);
 static void task0A_mpl_807E31C(u8 taskId);
 static void Task_WarpAndLoadMap(u8 taskId);
-static void Task_DoDoorWarp(u8 taskId);
+//static void Task_DoDoorWarp(u8 taskId);
 static void Task_EnableScriptAfterMusicFade(u8 taskId);
 
 // const
@@ -112,7 +113,7 @@ void WarpFadeOutScreen(void)
     }
 }
 
-static void SetPlayerVisibility(bool8 visible)
+void SetPlayerVisibility(bool8 visible)
 {
     SetPlayerInvisibility(!visible);
 }
@@ -278,6 +279,9 @@ void FieldCB_DefaultWarpExit(void)
     Overworld_PlaySpecialMapMusic();
     WarpFadeInScreen();
     SetUpWarpExitTask();
+    
+    FollowMe_WarpSetEnd();
+    
     ScriptContext2_Enable();
 }
 
@@ -326,6 +330,7 @@ static void Task_ExitDoor(u8 taskId)
     switch (task->data[0])
     {
     case 0:
+        HideFollower();
         SetPlayerVisibility(FALSE);
         FreezeObjectEvents();
         PlayerGetDestCoords(x, y);
@@ -355,6 +360,9 @@ static void Task_ExitDoor(u8 taskId)
     case 3:
         if (task->data[1] < 0 || gTasks[task->data[1]].isActive != TRUE)
         {
+            FollowMe_SetIndicatorToComeOutDoor();
+            FollowMe_WarpSetEnd();
+            
             UnfreezeObjectEvents();
             task->data[0] = 4;
         }
@@ -375,6 +383,7 @@ static void Task_ExitNonAnimDoor(u8 taskId)
     switch (task->data[0])
     {
     case 0:
+        HideFollower();
         SetPlayerVisibility(FALSE);
         FreezeObjectEvents();
         PlayerGetDestCoords(x, y);
@@ -393,6 +402,9 @@ static void Task_ExitNonAnimDoor(u8 taskId)
     case 2:
         if (IsPlayerStandingStill())
         {
+            FollowMe_SetIndicatorToComeOutDoor();
+            FollowMe_WarpSetEnd();
+            
             UnfreezeObjectEvents();
             task->data[0] = 3;
         }
@@ -674,6 +686,7 @@ static void Task_WarpAndLoadMap(u8 taskId)
     }
 }
 
+/*
 static void Task_DoDoorWarp(u8 taskId)
 {
     struct Task *task = &gTasks[taskId];
@@ -726,8 +739,9 @@ static void Task_DoDoorWarp(u8 taskId)
         break;
     }
 }
+*/
 
-static void task0A_fade_n_map_maybe(u8 taskId)
+void task0A_fade_n_map_maybe(u8 taskId)
 {
     struct Task *task = &gTasks[taskId];
 
@@ -1009,6 +1023,8 @@ static void task0A_mpl_807E31C(u8 taskId)
     case 1:
         if (WaitForWeatherFadeIn() && sub_808D1B4() != TRUE)
         {
+            FollowMe_WarpSetEnd();
+            
             UnfreezeObjectEvents();
             ScriptContext2_Disable();
             DestroyTask(taskId);
