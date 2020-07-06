@@ -5,6 +5,11 @@ Nature color stats
 BW repel system
 Money
 
+Ghoulslash:
+Follow-me (& Touched)
+Fast surfing
+
+
 group:
 pokemon_expansion
 battle engine
