@@ -938,7 +938,6 @@ LittlerootTown_EventScript_Mom:: @ 81E863D
 
 LittlerootTown_EventScript_SetReceivedRunningShoes:: @ 81E8686
 	removeobject 4
-	setflag FLAG_SYS_B_DASH
 	setvar VAR_LITTLEROOT_TOWN_STATE, 4
 	release
 	end
@@ -948,7 +947,6 @@ LittlerootTown_EventScript_GiveRunningShoes:: @ 81E8693
 	playfanfare MUS_FANFA4
 	message LittlerootTown_Text_SwitchShoesWithRunningShoes
 	waitfanfare
-	setflag FLAG_RECEIVED_RUNNING_SHOES
 	msgbox LittlerootTown_Text_ExplainRunningShoes, MSGBOX_DEFAULT
 	msgbox LittlerootTown_Text_ComeHomeIfAnythingHappens, MSGBOX_DEFAULT
 	closemessage

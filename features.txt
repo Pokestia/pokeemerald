@@ -1,4 +1,5 @@
 Decreased maximum possible fishing rounds required by 1.
+Indoor running
 
 Egg:
 Nature color stats
