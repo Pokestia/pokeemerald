@@ -10,6 +10,7 @@ Ghoulslash:
 Follow-me (& Touched)
 Fast surfing
 Surfing Dismount Ground Effects Bug Fix
+Snow Fix (& daniilS)
 
 
 group:
