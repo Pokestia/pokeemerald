@@ -9,8 +9,10 @@ Money
 Ghoulslash:
 Follow-me (& Touched)
 Fast surfing
+Surfing Dismount Ground Effects Bug Fix
 
 
 group:
 pokemon_expansion
 battle engine
+item_expansion
